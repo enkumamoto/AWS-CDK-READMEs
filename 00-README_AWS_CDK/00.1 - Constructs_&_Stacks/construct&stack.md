@@ -135,3 +135,4 @@ Existem três níveis de construções no AWS CDK:
 - **Stacks** são coleções de construções que formam uma unidade de implantação.
 
 Esses conceitos permitem a você estruturar, organizar e gerenciar a infraestrutura de forma eficiente e modular no AWS CDK.
+---
