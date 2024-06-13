@@ -73,7 +73,7 @@ my-cdk-app/
   
   from constructs import Construct
   
-  class PyStarterStack(Stack):
+  class MyCdkAppStack(Stack):
   
       def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
           super().__init__(scope, construct_id, **kwargs)
@@ -106,7 +106,7 @@ my-cdk-app/
 
     def test_s3_bucket_created():
         app = cdk.App()
-        stack = PyStarterStack(app, "MyTestStack")
+        stack = MyCdkAppStack(app, "MyTestStack")
         
         # Synthesizar a stack
         template = Template.from_stack(stack)
