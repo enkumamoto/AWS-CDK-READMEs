@@ -31,10 +31,10 @@ my-cdk-app/
 - **`app.py`**: Arquivo principal do aplicativo CDK. É aqui que a aplicação CDK é instanciada e as stacks são definidas e adicionadas ao aplicativo. Exemplo de conteúdo:
   ```python
   # app.py
-  from aws_cdk import core
+  import aws_cdk as cdk
   from my_cdk_app.my_cdk_app_stack import MyCdkAppStack
 
-  app = core.App()
+  app = cdk.App()
   MyCdkAppStack(app, "my-cdk-app")
 
   app.synth()
@@ -64,19 +64,29 @@ my-cdk-app/
 
 - **`my_cdk_app_stack.py`**: Arquivo onde você define a sua stack principal. Este arquivo contém a definição dos recursos AWS que compõem sua aplicação. Exemplo de conteúdo:
   ```python
-  from aws_cdk import core
-  from aws_cdk import aws_s3 as s3
-
-  class MyCdkAppStack(core.Stack):
-
-      def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
-          super().__init__(scope, id, **kwargs)
-
-          # Definição de um bucket S3
-          s3.Bucket(self, 
-                    "MyFirstBucket",
-                    versioned=True,
-                    removal_policy=core.RemovalPolicy.DESTROY)
+  from aws_cdk import (
+      Stack,
+      aws_s3 as s3,
+      Duration,
+      CfnOutput,
+  )
+  
+  from constructs import Construct
+  
+  class PyStarterStack(Stack):
+  
+      def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+          super().__init__(scope, construct_id, **kwargs)
+  
+          bucket = s3.Bucket(self, "TestBucket",
+                    lifecycle_rules = [
+                      s3.LifecycleRule(
+                          expiration = Duration.days(3)
+                      )
+                    ]
+                  )
+          CfnOutput(self, "BucketName", 
+                    value = bucket.bucket_name)
   ```
 
 #### Diretório `tests/`
@@ -89,19 +99,30 @@ my-cdk-app/
   
   - **`test_my_cdk_app_stack.py`**: Arquivo onde você pode escrever testes unitários para a sua stack usando frameworks como `unittest` ou `pytest`. Exemplo de conteúdo:
     ```python
-    import unittest
-    from aws_cdk import core
-    from my_cdk_app.my_cdk_app_stack import MyCdkAppStack
+    import aws_cdk as cdk
+    import pytest
+    from aws_cdk.assertions import Template
+    from py_starter_stack import PyStarterStack
 
-    class TestMyCdkAppStack(unittest.TestCase):
-
-        def test_s3_bucket_created(self):
-            app = core.App()
-            stack = MyCdkAppStack(app, "test-stack")
-            template = app.synth().get_stack_by_name("test-stack").template
-
-            # Verificar se um bucket S3 foi criado
-            self.assertIn("AWS::S3::Bucket", template["Resources"])
+    def test_s3_bucket_created():
+        app = cdk.App()
+        stack = PyStarterStack(app, "MyTestStack")
+        
+        # Synthesizar a stack
+        template = Template.from_stack(stack)
+        
+        # Verificar se um bucket S3 é criado
+        template.has_resource_properties("AWS::S3::Bucket", {
+            "LifecycleConfiguration": {
+                "Rules": [
+                    {
+                        "Status": "Enabled",
+                        "ExpirationInDays": 3
+                    }
+                ]
+            }
+        })
+        
+        # Verificar se a saída do nome do bucket foi criada
+        template.has_output("BucketName", {})
     ```
-
-Esta estrutura proporciona uma base organizada para desenvolver e gerenciar a infraestrutura com AWS CDK em Python, facilitando a manutenção, a escalabilidade e a colaboração no projeto.
