@@ -37,97 +37,97 @@ Existem três níveis de construções no AWS CDK:
    - Representam diretamente os recursos da AWS.
    - São gerados a partir dos arquivos CloudFormation.
    - Exemplo: `s3.CfnBucket` representa um bucket S3 no nível CloudFormation.
-     ```python
-     from aws_cdk import (
-       Stack,  # Importa a classe Stack, que é a base para todos os stacks CDK
-       aws_s3 as s3  # Importa o módulo aws_s3 e o renomeia como s3
-      )
-      from constructs import Construct  # Importa a classe Construct, que é a base para todos os constructs CDK
-   
-      class CdkS3ExampleStack(Stack):  # Define uma nova classe que herda de Stack
-   
-       def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
-           super().__init__(scope, construct_id, **kwargs)  # Chama o construtor da classe base
-   
-           # Cria um bucket S3 usando o construct de nível 1 (L1)
-           bucket = s3.CfnBucket(self, "MyBucket",
-               bucket_name="my-cdk-s3-bucket"  # Define o nome do bucket (opcional)
-           )
-           # CfnBucket: Construct de Nível 1 que representa um recurso AWS CloudFormation para um bucket S3
-           # self: Refere-se ao stack atual
-           # "MyBucket": Identificador lógico do recurso no template CloudFormation
-           # bucket_name: Parâmetro opcional para definir o nome do bucket S3
-     ```
-
-2. **Nível 2 (L2) - Constructs de Nível Médio**:
-   - São abstrações opinativas dos recursos de nível 1, oferecendo interfaces mais amigáveis e funcionalidades integradas.
-   - Exemplo: `s3.Bucket` é uma construção L2 que facilita a criação e configuração de um bucket S3.
-   ```python
-   from aws_cdk import (
-    Stack,
+    ```python
+    from aws_cdk import (
+    Stack,  # Importa a classe Stack, que é a base para todos os stacks CDK
     aws_s3 as s3  # Importa o módulo aws_s3 e o renomeia como s3
-   )
-   from constructs import Construct  # Importa a classe Construct, que é a base para todos os constructs CDK
+    )
+    from constructs import Construct  # Importa a classe Construct, que é a base para todos os constructs CDK
 
-   class CdkS3L2ExampleStack(Stack):
+    class CdkS3ExampleStack(Stack):  # Define uma nova classe que herda de Stack
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)  # Chama o construtor da classe base
 
-        # Cria um bucket S3 usando o construct de nível 2 (L2)
-        bucket = s3.Bucket(self, "MyL2Bucket",
-            # Define o nome do bucket (opcional)
-            bucket_name="my-l2-cdk-s3-bucket",
-            # Define a política de remoção para deletar o bucket ao destruir o stack
-            removal_policy=s3.RemovalPolicy.DESTROY,
-            # Define o bloqueio de versão para o bucket
-            versioned=True
+        # Cria um bucket S3 usando o construct de nível 1 (L1)
+        bucket = s3.CfnBucket(self, "MyBucket",
+            bucket_name="my-cdk-s3-bucket"  # Define o nome do bucket (opcional)
         )
-        # Explicação:
-        # - Bucket: É o construct de nível 2 para o recurso S3 Bucket.
-        # - self: Refere-se ao escopo do stack atual.
-        # - "MyL2Bucket": O identificador lógico do bucket.
-        # - bucket_name: O nome do bucket S3 (opcional).
-        # - removal_policy: Define a política de remoção do bucket (DESTROY = destruir o bucket ao remover o stack).
-        # - versioned: Habilita o versionamento no bucket S3.
-   ```
+        # CfnBucket: Construct de Nível 1 que representa um recurso AWS CloudFormation para um bucket S3
+        # self: Refere-se ao stack atual
+        # "MyBucket": Identificador lógico do recurso no template CloudFormation
+        # bucket_name: Parâmetro opcional para definir o nome do bucket S3
+    ```
+
+2. **Nível 2 (L2) - Constructs de Nível Médio**:
+   - São abstrações opinativas dos recursos de nível 1, oferecendo interfaces mais amigáveis e funcionalidades integradas.
+   - Exemplo: `s3.Bucket` é uma construção L2 que facilita a criação e configuração de um bucket S3.
+    ```python
+    from aws_cdk import (
+        Stack,
+        aws_s3 as s3  # Importa o módulo aws_s3 e o renomeia como s3
+    )
+    from constructs import Construct  # Importa a classe Construct, que é a base para todos os constructs CDK
+
+    class CdkS3L2ExampleStack(Stack):
+
+        def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+            super().__init__(scope, construct_id, **kwargs)  # Chama o construtor da classe base
+
+            # Cria um bucket S3 usando o construct de nível 2 (L2)
+            bucket = s3.Bucket(self, "MyL2Bucket",
+                # Define o nome do bucket (opcional)
+                bucket_name="my-l2-cdk-s3-bucket",
+                # Define a política de remoção para deletar o bucket ao destruir o stack
+                removal_policy=s3.RemovalPolicy.DESTROY,
+                # Define o bloqueio de versão para o bucket
+                versioned=True
+            )
+            # Explicação:
+            # - Bucket: É o construct de nível 2 para o recurso S3 Bucket.
+            # - self: Refere-se ao escopo do stack atual.
+            # - "MyL2Bucket": O identificador lógico do bucket.
+            # - bucket_name: O nome do bucket S3 (opcional).
+            # - removal_policy: Define a política de remoção do bucket (DESTROY = destruir o bucket ao remover o stack).
+            # - versioned: Habilita o versionamento no bucket S3.
+    ```
 
 3. **Nível 3 (L3) - Constructs de Nível Alto**:
    - São padrões completos que combinam múltiplos recursos para resolver casos de uso específicos.
    - Exemplo: `aws_solutions_constructs.aws_s3_lambda` que configura um bucket S3 junto com uma função Lambda que responde a eventos desse bucket.
-   ```python
-   from aws_cdk import (
-    Stack,
-    aws_s3 as s3,
-    aws_s3_deployment as s3deploy  # Importa o módulo aws_s3_deployment para realizar o deploy de conteúdo
-   )
-   from constructs import Construct
-   
-   class CdkS3L3ExampleStack(Stack):
+    ```python
+    from aws_cdk import (
+        Stack,
+        aws_s3 as s3,
+        aws_s3_deployment as s3deploy  # Importa o módulo aws_s3_deployment para realizar o deploy de conteúdo
+    )
+    from constructs import Construct
+    
+    class CdkS3L3ExampleStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
-        super().__init__(scope, construct_id, **kwargs)
+        def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+            super().__init__(scope, construct_id, **kwargs)
 
-        # Cria um bucket S3 de Nível 2 (L2)
-        bucket = s3.Bucket(self, "MyL3Bucket",
-            bucket_name="my-l3-cdk-s3-bucket",
-            removal_policy=s3.RemovalPolicy.DESTROY,
-            versioned=True
-        )
+            # Cria um bucket S3 de Nível 2 (L2)
+            bucket = s3.Bucket(self, "MyL3Bucket",
+                bucket_name="my-l3-cdk-s3-bucket",
+                removal_policy=s3.RemovalPolicy.DESTROY,
+                versioned=True
+            )
 
-        # Realiza o deploy de conteúdo estático para o bucket S3
-        deployment = s3deploy.BucketDeployment(self, "DeployStaticContent",
-            sources=[s3deploy.Source.asset("./static-content")],  # Define o diretório de origem do conteúdo estático
-            destination_bucket=bucket,
-            destination_key_prefix="web/static"  # Prefixo de destino no bucket S3
-        )
-        # Explicação:
-        # - Bucket: Construct de Nível 2 que cria um bucket S3.
-        # - BucketDeployment: Construct de Nível 3 que realiza o deploy de conteúdo estático para o bucket S3.
-        # - sources: Define a origem do conteúdo a ser enviado para o bucket S3.
-        # - destination_bucket: Define o bucket de destino.
-        # - destination_key_prefix: Define o prefixo de destino para o conteúdo dentro do bucket S3.
-   ```
+            # Realiza o deploy de conteúdo estático para o bucket S3
+            deployment = s3deploy.BucketDeployment(self, "DeployStaticContent",
+                sources=[s3deploy.Source.asset("./static-content")],  # Define o diretório de origem do conteúdo estático
+                destination_bucket=bucket,
+                destination_key_prefix="web/static"  # Prefixo de destino no bucket S3
+            )
+            # Explicação:
+            # - Bucket: Construct de Nível 2 que cria um bucket S3.
+            # - BucketDeployment: Construct de Nível 3 que realiza o deploy de conteúdo estático para o bucket S3.
+            # - sources: Define a origem do conteúdo a ser enviado para o bucket S3.
+            # - destination_bucket: Define o bucket de destino.
+            # - destination_key_prefix: Define o prefixo de destino para o conteúdo dentro do bucket S3.
+    ```
 
 ### Resumo
 
@@ -135,3 +135,4 @@ Existem três níveis de construções no AWS CDK:
 - **Stacks** são coleções de construções que formam uma unidade de implantação.
 
 Esses conceitos permitem a você estruturar, organizar e gerenciar a infraestrutura de forma eficiente e modular no AWS CDK.
+---
